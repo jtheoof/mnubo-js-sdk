@@ -28,7 +28,7 @@
     "karma-chrome-launcher": "^0.2.1",
     "karma-jasmine": "^0.3.6",
     "karma-jasmine-html-reporter": "^0.1.8",
-    "systemjs-builder": "^0.14.9",
+    "systemjs-builder": "^0.14.11",
     "typescript": "^1.6.2"
   },
   "keywords": [

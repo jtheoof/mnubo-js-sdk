@@ -12,7 +12,7 @@
         "preserveConstEnums": true,
         "sourceMap": true,
         "suppressImplicitAnyIndexErrors": false,
-        "outDir": "dist"
+        "outDir": "build"
     },
     "filesGlob": [
         "./tsd_typings/tsd.d.ts",
