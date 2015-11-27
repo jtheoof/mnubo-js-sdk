@@ -88,7 +88,6 @@ export class Client {
 
     options.headers.set('Authorization', `Basic ${base64Encode(id + ':' + secret)}`);
     options.headers.set('Content-Type', 'application/x-www-form-urlencoded');
-    options.headers.set('Accept-Encoding', 'application/json');
 
     _.merge(options, this.options.httpOptions);
 
