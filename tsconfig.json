@@ -29,7 +29,6 @@
         "./src/ingestion/events.ts",
         "./src/ingestion/objects.ts",
         "./src/ingestion/owners.ts",
-        "./src/mnubo.static.ts",
         "./src/mnubo.ts",
         "./src/restitution/search.ts",
         "./src/utils/underscore.ts"

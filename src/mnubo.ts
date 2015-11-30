@@ -151,3 +151,20 @@ export class Client {
     return http.delete(this.buildHttpOptions(path, contentType));
   }
 }
+
+if (typeof window !== 'undefined') {
+  const _mnubo = (<any>window).mnubo;
+
+  const mnubo = (<any>window).mnubo = {
+    Client: Client
+  };
+
+  /**
+  * Calling noConflict will restore window.mnubo to its previous loading state
+  * and return the mnubo module object.
+  */
+  (<any>window).mnubo.noConflict = function() {
+    (<any>window).mnubo = _mnubo;
+    return mnubo;
+  };
+}
