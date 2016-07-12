@@ -1,7 +1,16 @@
 import * as http from 'http';
 import * as https from 'https';
+import * as zlib from 'zlib';
 
 import {Request, RequestMethods} from '../request';
+
+function compress(response: http.IncomingMessage, data: any, compression?: string): any {
+  if (!compression) {
+    return data;
+  }
+
+  return response.pipe(zlib.createGunzip()).pipe(data);
+}
 
 export function nodeHttpRequest(request: Request): Promise<any> {
   const data = request.payload();
@@ -61,6 +70,10 @@ export function nodeHttpRequest(request: Request): Promise<any> {
     req.on('error', (error: any) => {
       reject(error);
     });
+
+    if (options.headers['Content-Encoding']) {
+      data = compress(data);
+    }
 
     req.write(data);
     req.end();
