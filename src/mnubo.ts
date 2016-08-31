@@ -14,11 +14,17 @@ export enum OAuth2Scopes {
   WRITE
 }
 
+interface ClientCompression {
+  requests: boolean;
+  responses: boolean;
+}
+
 interface ClientOptions {
   id: string;
   secret: string;
   env: string;
   httpOptions?: RequestOptions;
+  compression?: boolean | ClientCompression;
 }
 
 class AccessToken {
@@ -54,6 +60,10 @@ export class Client {
         hostname: this.hostname(),
         port: 443
       };
+    }
+
+    if (!options.compression) {
+        options.compression = false;
     }
 
     this.owners = new Owners(this);
@@ -123,11 +133,24 @@ export class Client {
       path: path,
       headers: new Map<string, string>()
     };
+    const compressionAlgorithm = 'gzip';
 
     contentType = contentType || 'application/json';
 
     options.headers.set('Authorization', `Bearer ${this.token.value}`);
     options.headers.set('Content-Type', `${contentType}`);
+
+    if (this.options.compression === true) {
+      options.headers.set('Accept-Encoding', compressionAlgorithm);
+      options.headers.set('Content-Encoding', compressionAlgorithm);
+    } else if (typeof(this.options.compression) === 'object') {
+      if (this.options.compression.requests === true) {
+          options.headers.set('Content-Encoding', compressionAlgorithm);
+      }
+      if (this.options.compression.responses === true) {
+          options.headers.set('Accept-Encoding', compressionAlgorithm);
+      }
+  }
 
     Object.assign(options, this.options.httpOptions);
 

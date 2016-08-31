@@ -1,10 +1,17 @@
 import * as http from 'http';
 import * as https from 'https';
+import * as zlib from 'zlib';
+
+import * as fs from 'fs';
 
 import {Request, RequestMethods} from '../request';
 
 export function nodeHttpRequest(request: Request): Promise<any> {
-  const data = request.payload();
+  let data = request.payload();
+
+  if (request.options.headers.get('Content-Encoding') === 'gzip') {
+      data = zlib.gzipSync(new Buffer(data));
+  }
 
   const options: http.RequestOptions = {
     protocol: request.options.protocol + ':',
@@ -13,7 +20,7 @@ export function nodeHttpRequest(request: Request): Promise<any> {
     method: RequestMethods[request.method],
     path: request.options.path,
     headers: {
-      'Content-Length': Buffer.byteLength(data)
+      'Content-Length': data.length
     }
   };
 
@@ -23,29 +30,37 @@ export function nodeHttpRequest(request: Request): Promise<any> {
 
   const promise = new Promise((resolve, reject) => {
     const cb = function(response: http.IncomingMessage) {
-      let data = '';
+      const buffers: Array<Buffer> = [];
 
-      response.setEncoding('utf8');
-
-      response.on('data', function (chunk: string) {
-        data += chunk;
+      response.on('data', function (chunk: Buffer) {
+        buffers.push(chunk);
       });
 
       response.on('end', function() {
-        if (data.length) {
+        const buffer = Buffer.concat(buffers);
+        let payload: string;
+
+        if (response.headers['content-encoding'] === 'gzip') {
+          payload = zlib.gunzipSync(buffer);
+        } else {
+          payload = buffer.toString();
+        }
+
+        if (payload.length) {
           if (response.headers &&
             response.headers['content-type'] &&
             response.headers['content-type'].indexOf('application/json') !== -1) {
-            data = JSON.parse(data);
+
+            payload = JSON.parse(payload);
           }
         } else {
-          data = null;
+          payload = null;
         }
 
         if (response.statusCode >= 200 && response.statusCode < 300) {
-          resolve(data);
+          resolve(payload);
         } else {
-          reject(data);
+          reject(payload);
         }
       });
     };
